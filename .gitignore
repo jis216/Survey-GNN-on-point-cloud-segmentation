@@ -1,3 +1,9 @@
+# Exclude Data
+data/
+dgcnn.pytorch/data/
+dgcnn.pytorch/checkpoints/
+
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
