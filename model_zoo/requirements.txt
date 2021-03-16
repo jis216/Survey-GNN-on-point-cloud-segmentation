@@ -1,0 +1,11 @@
+-f https://download.pytorch.org/whl/torch_stable.html
+torch==1.7.0+${GNN_DEVICE}
+torchvision==0.8.1+${GNN_DEVICE}
+torchaudio==0.7.0
+-f https://pytorch-geometric.com/whl/torch-1.7.0+${GNN_DEVICE}.html
+torch-scatter==2.0.6
+torch-sparse==0.6.9
+torch-cluster==1.5.9
+torch-spline-conv==1.2.1
+torch-geometric==1.6.3
+tensorboard==2.4.1
