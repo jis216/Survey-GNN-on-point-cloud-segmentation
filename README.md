@@ -1,5 +1,5 @@
 # Survey of GNN on 3D Point Cloud Segmentation
-CS249 course project
+CS249 course project Group 1
 
 ## Links
 Presentation Slides:
