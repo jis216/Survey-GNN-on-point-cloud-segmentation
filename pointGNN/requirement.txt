@@ -1,6 +1,0 @@
-tensorflow-gpu==1.15.0
-opencv-python
-open3d-python==0.7.0.0
-scikit-learn
-tqdm
-shapely
