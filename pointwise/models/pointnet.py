@@ -1,65 +1,141 @@
-#! /usr/bin/env python3
-# -*- coding: utf-8 -*-
-# vim:fenc=utf-8
-#
-# Copyright © 2021 Hengda Shi <hengda.shi@cs.ucla.edu>
-#
-# Distributed under terms of the MIT license.
-
-"""
-
-"""
-
 import torch
+import torch.nn as nn
+import torch.nn.parallel
+import torch.utils.data
+from torch.autograd import Variable
+import numpy as np
 import torch.nn.functional as F
 
-from torch_geometric.nn import knn_interpolate
+
+class STN3d(nn.Module):
+    def __init__(self, channel):
+        super(STN3d, self).__init__()
+        self.conv1 = torch.nn.Conv1d(channel, 64, 1)
+        self.conv2 = torch.nn.Conv1d(64, 128, 1)
+        self.conv3 = torch.nn.Conv1d(128, 1024, 1)
+        self.fc1 = nn.Linear(1024, 512)
+        self.fc2 = nn.Linear(512, 256)
+        self.fc3 = nn.Linear(256, 9)
+        self.relu = nn.ReLU()
+
+        self.bn1 = nn.BatchNorm1d(64)
+        self.bn2 = nn.BatchNorm1d(128)
+        self.bn3 = nn.BatchNorm1d(1024)
+        self.bn4 = nn.BatchNorm1d(512)
+        self.bn5 = nn.BatchNorm1d(256)
+
+    def forward(self, x):
+        batchsize = x.size()[0]
+        x = F.relu(self.bn1(self.conv1(x)))
+        x = F.relu(self.bn2(self.conv2(x)))
+        x = F.relu(self.bn3(self.conv3(x)))
+        x = torch.max(x, 2, keepdim=True)[0]
+        x = x.view(-1, 1024)
+
+        x = F.relu(self.bn4(self.fc1(x)))
+        x = F.relu(self.bn5(self.fc2(x)))
+        x = self.fc3(x)
+
+        iden = Variable(torch.from_numpy(np.array([1, 0, 0, 0, 1, 0, 0, 0, 1]).astype(np.float32))).view(1, 9).repeat(
+            batchsize, 1)
+        if x.is_cuda:
+            iden = iden.cuda()
+        x = x + iden
+        x = x.view(-1, 3, 3)
+        return x
 
 
-from models.base import SAModule, GlobalSAModule, MLP
+class STNkd(nn.Module):
+    def __init__(self, k=64):
+        super(STNkd, self).__init__()
+        self.conv1 = torch.nn.Conv1d(k, 64, 1)
+        self.conv2 = torch.nn.Conv1d(64, 128, 1)
+        self.conv3 = torch.nn.Conv1d(128, 1024, 1)
+        self.fc1 = nn.Linear(1024, 512)
+        self.fc2 = nn.Linear(512, 256)
+        self.fc3 = nn.Linear(256, k * k)
+        self.relu = nn.ReLU()
 
-class FPModule(torch.nn.Module):
-    def __init__(self, k, nn):
-        super(FPModule, self).__init__()
+        self.bn1 = nn.BatchNorm1d(64)
+        self.bn2 = nn.BatchNorm1d(128)
+        self.bn3 = nn.BatchNorm1d(1024)
+        self.bn4 = nn.BatchNorm1d(512)
+        self.bn5 = nn.BatchNorm1d(256)
+
         self.k = k
-        self.nn = nn
 
-    def forward(self, x, pos, batch, x_skip, pos_skip, batch_skip):
-        x = knn_interpolate(x, pos, pos_skip, batch, batch_skip, k=self.k)
-        if x_skip is not None:
-            x = torch.cat([x, x_skip], dim=1)
-        x = self.nn(x)
-        return x, pos_skip, batch_skip
+    def forward(self, x):
+        batchsize = x.size()[0]
+        x = F.relu(self.bn1(self.conv1(x)))
+        x = F.relu(self.bn2(self.conv2(x)))
+        x = F.relu(self.bn3(self.conv3(x)))
+        x = torch.max(x, 2, keepdim=True)[0]
+        x = x.view(-1, 1024)
+
+        x = F.relu(self.bn4(self.fc1(x)))
+        x = F.relu(self.bn5(self.fc2(x)))
+        x = self.fc3(x)
+
+        iden = Variable(torch.from_numpy(np.eye(self.k).flatten().astype(np.float32))).view(1, self.k * self.k).repeat(
+            batchsize, 1)
+        if x.is_cuda:
+            iden = iden.cuda()
+        x = x + iden
+        x = x.view(-1, self.k, self.k)
+        return x
 
 
-class PointNet(torch.nn.Module):
-    def __init__(self, num_classes, k=None):
-        super(PointNet, self).__init__()
-        self.sa1_module = SAModule(0.2, 0.2, MLP([3 + 3, 64, 64, 128]))
-        self.sa2_module = SAModule(0.25, 0.4, MLP([128 + 3, 128, 128, 256]))
-        self.sa3_module = GlobalSAModule(MLP([256 + 3, 256, 512, 1024]))
+class PointNetEncoder(nn.Module):
+    def __init__(self, global_feat=True, feature_transform=False, channel=3):
+        super(PointNetEncoder, self).__init__()
+        self.stn = STN3d(channel)
+        self.conv1 = torch.nn.Conv1d(channel, 64, 1)
+        self.conv2 = torch.nn.Conv1d(64, 128, 1)
+        self.conv3 = torch.nn.Conv1d(128, 1024, 1)
+        self.bn1 = nn.BatchNorm1d(64)
+        self.bn2 = nn.BatchNorm1d(128)
+        self.bn3 = nn.BatchNorm1d(1024)
+        self.global_feat = global_feat
+        self.feature_transform = feature_transform
+        if self.feature_transform:
+            self.fstn = STNkd(k=64)
 
-        self.fp3_module = FPModule(1, MLP([1024 + 256, 256, 256]))
-        self.fp2_module = FPModule(3, MLP([256 + 128, 256, 128]))
-        self.fp1_module = FPModule(3, MLP([128 + 3, 128, 128, 128]))
+    def forward(self, x):
+        B, D, N = x.size()
+        trans = self.stn(x)
+        x = x.transpose(2, 1)
+        if D >3 :
+            x, feature = x.split(3,dim=2)
+        x = torch.bmm(x, trans)
+        if D > 3:
+            x = torch.cat([x,feature],dim=2)
+        x = x.transpose(2, 1)
+        x = F.relu(self.bn1(self.conv1(x)))
 
-        self.lin1 = torch.nn.Linear(128, 128)
-        self.lin2 = torch.nn.Linear(128, 128)
-        self.lin3 = torch.nn.Linear(128, num_classes)
+        if self.feature_transform:
+            trans_feat = self.fstn(x)
+            x = x.transpose(2, 1)
+            x = torch.bmm(x, trans_feat)
+            x = x.transpose(2, 1)
+        else:
+            trans_feat = None
 
-    def forward(self, data):
-        sa0_out = (data.x, data.pos, data.batch)
-        sa1_out = self.sa1_module(*sa0_out)
-        sa2_out = self.sa2_module(*sa1_out)
-        sa3_out = self.sa3_module(*sa2_out)
+        pointfeat = x
+        x = F.relu(self.bn2(self.conv2(x)))
+        x = self.bn3(self.conv3(x))
+        x = torch.max(x, 2, keepdim=True)[0]
+        x = x.view(-1, 1024)
+        if self.global_feat:
+            return x, trans, trans_feat
+        else:
+            x = x.view(-1, 1024, 1).repeat(1, 1, N)
+            return torch.cat([x, pointfeat], 1), trans, trans_feat
 
-        fp3_out = self.fp3_module(*sa3_out, *sa2_out)
-        fp2_out = self.fp2_module(*fp3_out, *sa1_out)
-        x, _, _ = self.fp1_module(*fp2_out, *sa0_out)
 
-        x = F.relu(self.lin1(x))
-        x = F.dropout(x, p=0.5, training=self.training)
-        x = self.lin2(x)
-        x = F.dropout(x, p=0.5, training=self.training)
-        x = self.lin3(x)
-        return F.log_softmax(x, dim=-1)
+def feature_transform_reguliarzer(trans):
+    d = trans.size()[1]
+    I = torch.eye(d)[None, :, :]
+    if trans.is_cuda:
+        I = I.cuda()
+    loss = torch.mean(torch.norm(torch.bmm(trans, trans.transpose(2, 1) - I), dim=(1, 2)))
+    return loss
