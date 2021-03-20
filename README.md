@@ -14,13 +14,13 @@ Overleaf Report:
 Please follow the instruction in each sub-directory to download data/models and run experiments.
 
 ## Paper List
-1. PointNet: Deep Learning on Point Sets for 3D Classification and Segmentation [link](https://openaccess.thecvf.com/content_cvpr_2017/html/Qi_PointNet_Deep_Learning_CVPR_2017_paper.html)
-2. PointNet++: Deep Hierarchical Feature Learning on Point Sets in a Metric Space [link](https://papers.nips.cc/paper/2017/hash/d8bf84be3800d12f74d8b05e9b89836f-Abstract.html)
-3. Dynamic Graph CNN for Learning on Point Clouds [link](https://dl.acm.org/doi/10.1145/3326362)
-4. RGCNN: Regularized Graph CNN for Point Cloud Segmentation [link](https://dl.acm.org/doi/10.1145/3240508.3240621)
-5. Linked Dynamic Graph CNN: Learning on Point Cloud via Linking Hierarchical Features [link](https://arxiv.org/abs/1904.10014)
-6. DeepGCNs: Can GCNs Go as Deep as CNNs? [link](https://openaccess.thecvf.com/content_ICCV_2019/html/Li_DeepGCNs_Can_GCNs_Go_As_Deep_As_CNNs_ICCV_2019_paper.html)
-7. Graph Attention Convolution for Point Cloud Semantic Segmentation [link](https://openaccess.thecvf.com/content_CVPR_2019/html/Wang_Graph_Attention_Convolution_for_Point_Cloud_Semantic_Segmentation_CVPR_2019_paper.html)
-8. Hierarchical Depthwise Graph Convolutional Neural Network for 3D Semantic Segmentation of Point Clouds [link](https://ieeexplore.ieee.org/abstract/document/8794052)
-9. Hierarchical Point-Edge Interaction Network for Point Cloud Semantic Segmentation [link](https://openaccess.thecvf.com/content_ICCV_2019/html/Jiang_Hierarchical_Point-Edge_Interaction_Network_for_Point_Cloud_Semantic_Segmentation_ICCV_2019_paper.html)
-10. RandLA-Net: Efficient Semantic Segmentation of Large-Scale Point Clouds [link](https://openaccess.thecvf.com/content_CVPR_2020/html/Hu_RandLA-Net_Efficient_Semantic_Segmentation_of_Large-Scale_Point_Clouds_CVPR_2020_paper.html)
+- PointNet: Deep Learning on Point Sets for 3D Classification and Segmentation [[paper](https://openaccess.thecvf.com/content_cvpr_2017/html/Qi_PointNet_Deep_Learning_CVPR_2017_paper.html)]
+- PointNet++: Deep Hierarchical Feature Learning on Point Sets in a Metric Space [[paper](https://papers.nips.cc/paper/2017/hash/d8bf84be3800d12f74d8b05e9b89836f-Abstract.html)]
+- Dynamic Graph CNN for Learning on Point Clouds [[paper](https://dl.acm.org/doi/10.1145/3326362)]
+- RGCNN: Regularized Graph CNN for Point Cloud Segmentation [paper](https://dl.acm.org/doi/10.1145/3240508.3240621)]
+- Linked Dynamic Graph CNN: Learning on Point Cloud via Linking Hierarchical Features [[paper](https://arxiv.org/abs/1904.10014)]
+- DeepGCNs: Can GCNs Go as Deep as CNNs? [[paper](https://openaccess.thecvf.com/content_ICCV_2019/html/Li_DeepGCNs_Can_GCNs_Go_As_Deep_As_CNNs_ICCV_2019_paper.html)]
+- Graph Attention Convolution for Point Cloud Semantic Segmentation [[paper](https://openaccess.thecvf.com/content_CVPR_2019/html/Wang_Graph_Attention_Convolution_for_Point_Cloud_Semantic_Segmentation_CVPR_2019_paper.html)]
+- Hierarchical Depthwise Graph Convolutional Neural Network for 3D Semantic Segmentation of Point Clouds [[paper](https://ieeexplore.ieee.org/abstract/document/8794052)]
+- Hierarchical Point-Edge Interaction Network for Point Cloud Semantic Segmentation [[paper](https://openaccess.thecvf.com/content_ICCV_2019/html/Jiang_Hierarchical_Point-Edge_Interaction_Network_for_Point_Cloud_Semantic_Segmentation_ICCV_2019_paper.html)]
+- RandLA-Net: Efficient Semantic Segmentation of Large-Scale Point Clouds [[paper](https://openaccess.thecvf.com/content_CVPR_2020/html/Hu_RandLA-Net_Efficient_Semantic_Segmentation_of_Large-Scale_Point_Clouds_CVPR_2020_paper.html)]
